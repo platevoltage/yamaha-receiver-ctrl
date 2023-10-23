@@ -1,6 +1,8 @@
+import xml2js from "xml2js";
+
 const receiverIP = process.argv[2];
 const url = `http://${receiverIP}/YamahaRemoteControl/ctrl`;
-const getInfo = `
+const getInfoXML = `
     <YAMAHA_AV cmd="GET">
         <Main_Zone>
             <Basic_Status>GetParam</Basic_Status>
@@ -8,33 +10,55 @@ const getInfo = `
     </YAMAHA_AV>`;
 
 
-function makeRequest(xmlData) {
+async function makeRequest(xmlData) {
 
   const requestOptions = {
     method: "POST",
     headers: {
-      "Content-Type": "text/xml", // Set the content type to XML
+      "Content-Type": "text/xml",
     },
-    body: xmlData, // Set the XML data as the request body
+    body: xmlData,
   };
 
-  // Make the fetch request
-  fetch(url, requestOptions)
-    .then(response => {
-      if (response.ok) {
-        return response.text(); // Assuming you expect a text response
-      } else {
-        throw new Error("Request failed");
-      }
-    })
-    .then(data => {
-      console.log(data); // Handle the response data here
-    })
-    .catch(error => {
-      console.error("Error:", error);
-    });
+  try {
+
+    const response = await fetch(url, requestOptions);
+    
+    if (response.ok) {
+      const xml = await response.text(); 
+      return await parseXML(xml);
+    } 
+
+  } catch (error) {
+    console.error("Error:", error);
+  }
 
 }
 
+async function parseXML(xml) {
+  return new Promise((resolve, reject) => {
+    xml2js.parseString(xml, (error, result) => {
+      if (error) {
+        console.error(error);
+        reject( error );
+      }
+      else {
+        //   console.log( result.YAMAHA_AV );
+        resolve( result );
+      }
+    });
+  });
+}
 
-makeRequest(getInfo);
+const getInfo = await makeRequest(getInfoXML);
+
+console.log( getInfo );
+
+// xml2js.parseString(getInfo, (error, result) => {
+//   if (error) {
+//     console.error(error);
+//   }
+//   else {
+//     console.log( result.YAMAHA_AV );
+//   }
+// });
