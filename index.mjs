@@ -1,5 +1,7 @@
 import xml2js from "xml2js";
 
+let status;
+
 const receiverIP = process.argv[2];
 const url = `http://${receiverIP}/YamahaRemoteControl/ctrl`;
 const getInfoXML = `
@@ -49,8 +51,17 @@ async function parseXML(xml) {
   });
 }
 
-const getInfo = await makeRequest(getInfoXML);
+async function getInfo() {
+  return await makeRequest(getInfoXML);
+}
 
-console.log( getInfo.YAMAHA_AV );
 
 
+setInterval(() => {
+  (async () => {
+    status = await getInfo();
+  })();
+  if (status) {
+    // console.log( status.YAMAHA_AV.Main_Zone[0].Basic_Status[0].Volume[0].Lvl[0].Val[0] );
+  }
+}, 1000);
