@@ -40,11 +40,10 @@ async function parseXML(xml) {
     xml2js.parseString(xml, (error, result) => {
       if (error) {
         console.error(error);
-        reject( error );
+        reject(error);
       }
       else {
-        //   console.log( result.YAMAHA_AV );
-        resolve( result );
+        resolve(result);
       }
     });
   });
@@ -52,13 +51,6 @@ async function parseXML(xml) {
 
 const getInfo = await makeRequest(getInfoXML);
 
-console.log( getInfo );
+console.log( getInfo.YAMAHA_AV );
 
-// xml2js.parseString(getInfo, (error, result) => {
-//   if (error) {
-//     console.error(error);
-//   }
-//   else {
-//     console.log( result.YAMAHA_AV );
-//   }
-// });
+
