@@ -1,0 +1,15 @@
+{
+  "name": "yamaha-reciever-ctrl",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.mjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.mjs 10.0.0.126"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "eslint": "^8.52.0"
+  }
+}
