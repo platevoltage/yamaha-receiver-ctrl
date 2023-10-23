@@ -1,7 +1,12 @@
 import xml2js from "xml2js";
+import express from "express"; 
+
+const app = express();
 
 let status;
+let volume = -40;
 
+const port = 6666;
 const receiverIP = process.argv[2];
 const url = `http://${receiverIP}/YamahaRemoteControl/ctrl`;
 const getInfoXML = `
@@ -52,16 +57,53 @@ async function parseXML(xml) {
 }
 
 async function getInfo() {
-  return await makeRequest(getInfoXML);
+  status =  await makeRequest(getInfoXML);
 }
 
+app.get("/info", async (req, res) => {
+  res.json(status);
+});
 
+app.get("/volume/:direction", async (req, res) => {
+  if (req.params.direction === "up") {
+    volume++;
+  } 
+  else if (req.params.direction === "down") {
+    volume--;
+  }
+  else {
+    res.status(404);
+    return;
+  }
+  
+  const volumeXML = `
+    <YAMAHA_AV cmd="PUT">
+        <Main_Zone>
+            <Volume>
+                <Lvl>
+                    <Val>${volume * 10}</Val>
+                    <Exp>1</Exp>
+                    <Unit>dB</Unit>
+                </Lvl>
+            </Volume>
+        </Main_Zone>
+    </YAMAHA_AV>`;
+
+  const response = await makeRequest(volumeXML);
+  console.log(response);
+  res.json(volume);
+});
 
 setInterval(() => {
-  (async () => {
-    status = await getInfo();
-  })();
+  getInfo();
+
   if (status) {
+    volume = Math.floor((+status.YAMAHA_AV.Main_Zone[0].Basic_Status[0].Volume[0].Lvl[0].Val[0]) / 10); 
     // console.log( status.YAMAHA_AV.Main_Zone[0].Basic_Status[0].Volume[0].Lvl[0].Val[0] );
   }
-}, 1000);
+}, 5000);
+
+
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
