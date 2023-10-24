@@ -108,7 +108,7 @@ setInterval(() => {
 
   if (status && allowVolumeVarUpdate) {
     volume = Math.floor((+status.YAMAHA_AV.Main_Zone[0].Basic_Status[0].Volume[0].Lvl[0].Val[0]) / 10); 
-    // console.log( status.YAMAHA_AV.Main_Zone[0].Basic_Status[0].Volume[0].Lvl[0].Val[0] );
+    console.log("VOLUME", volume);
   }
 }, 60000);
 
