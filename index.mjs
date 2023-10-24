@@ -5,6 +5,7 @@ const app = express();
 
 let status;
 let volume = -40;
+let allowVolumeVarUpdate = true;
 
 const port = 6666;
 const receiverIP = process.argv[2];
@@ -64,6 +65,8 @@ app.get("/info", async (req, res) => {
   res.json(status);
 });
 
+let timeout;
+
 app.get("/volume/:direction", async (req, res) => {
   if (req.params.direction === "up") {
     volume++;
@@ -76,6 +79,12 @@ app.get("/volume/:direction", async (req, res) => {
     return;
   }
   
+  if (timeout) clearTimeout(timeout);
+  allowVolumeVarUpdate = false;
+  timeout = setTimeout(() => {
+    allowVolumeVarUpdate = true;
+  }, 20000);
+
   const volumeXML = `
     <YAMAHA_AV cmd="PUT">
         <Main_Zone>
@@ -97,11 +106,11 @@ app.get("/volume/:direction", async (req, res) => {
 setInterval(() => {
   getInfo();
 
-  if (status) {
+  if (status && allowVolumeVarUpdate) {
     volume = Math.floor((+status.YAMAHA_AV.Main_Zone[0].Basic_Status[0].Volume[0].Lvl[0].Val[0]) / 10); 
     // console.log( status.YAMAHA_AV.Main_Zone[0].Basic_Status[0].Volume[0].Lvl[0].Val[0] );
   }
-}, 5000);
+}, 60000);
 
 
 app.listen(port, () => {
